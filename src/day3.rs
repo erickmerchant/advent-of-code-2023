@@ -1,18 +1,59 @@
 use std::collections::{HashMap, HashSet};
 
-#[derive(Default, PartialEq, Eq, Debug)]
-pub struct Number {
-    pub value: u32,
-    pub field: CoordsSet,
+pub fn part1(input: Vec<String>) -> u32 {
+    let mut collection = Vec::<u32>::new();
+    let (symbols, numbers) = parse_input(input);
+    let symbol_locations: CoordsSet = symbols.keys().cloned().collect();
+
+    for number in numbers {
+        if number.field.intersection(&symbol_locations).count() > 0 {
+            collection.push(number.value);
+        }
+    }
+
+    let result = &collection.iter().sum::<u32>();
+
+    *result
 }
 
-pub type Coords = (u32, u32);
-pub type CoordsSet = HashSet<Coords>;
+pub fn part2(input: Vec<String>) -> u32 {
+    let mut collection = Vec::<u32>::new();
+    let (symbols, numbers) = parse_input(input);
+
+    for (location, symbol) in symbols {
+        if symbol == '*' {
+            let mut part_numbers = Vec::<u32>::new();
+
+            for number in &numbers {
+                if number.field.contains(&location) {
+                    part_numbers.push(number.value);
+                }
+            }
+
+            if part_numbers.len() == 2 {
+                collection.push(part_numbers[0] * part_numbers[1]);
+            }
+        }
+    }
+
+    let result = &collection.iter().sum::<u32>();
+
+    *result
+}
+
+#[derive(Default, PartialEq, Eq, Debug)]
+struct Number {
+    value: u32,
+    field: CoordsSet,
+}
+
+type Coords = (u32, u32);
+type CoordsSet = HashSet<Coords>;
 type SymbolMap = HashMap<Coords, char>;
 type NumberList = Vec<Number>;
 type Output = (SymbolMap, NumberList);
 
-pub fn parse_input(input: Vec<String>) -> Output {
+fn parse_input(input: Vec<String>) -> Output {
     let mut symbols = SymbolMap::new();
     let mut numbers = NumberList::new();
     let mut current: Number = Default::default();
@@ -64,38 +105,32 @@ pub fn parse_input(input: Vec<String>) -> Output {
 mod tests {
     use super::*;
 
+    fn get_fixture() -> Vec<String> {
+        vec![
+            "467..114..".to_string(),
+            "...*......".to_string(),
+            "..35..633.".to_string(),
+            "......#...".to_string(),
+            "617*......".to_string(),
+            ".....+.58.".to_string(),
+            "..592.....".to_string(),
+            "......755.".to_string(),
+            "...$.*....".to_string(),
+            ".664.598..".to_string(),
+        ]
+    }
+
     #[test]
-    fn test_parse_input() {
-        let output = parse_input(vec![
-            "...".to_string(),
-            ".12".to_string(),
-            ".*.".to_string(),
-        ]);
-        let mut expected_symbols = SymbolMap::new();
-        let mut expected_numbers = NumberList::new();
+    fn test_part1() {
+        let fixture = get_fixture();
 
-        expected_symbols.insert((2, 1), '*');
+        assert_eq!(part1(fixture), 4361);
+    }
 
-        let mut field = CoordsSet::new();
+    #[test]
+    fn test_part2() {
+        let fixture = get_fixture();
 
-        field.insert((0, 0));
-        field.insert((0, 1));
-        field.insert((0, 2));
-        field.insert((0, 3));
-        field.insert((1, 0));
-        field.insert((1, 1));
-        field.insert((1, 2));
-        field.insert((1, 3));
-        field.insert((2, 0));
-        field.insert((2, 1));
-        field.insert((2, 2));
-        field.insert((2, 3));
-
-        expected_numbers.push(Number {
-            value: 12_u32,
-            field,
-        });
-
-        assert_eq!(output, (expected_symbols, expected_numbers));
+        assert_eq!(part2(fixture), 467835);
     }
 }
