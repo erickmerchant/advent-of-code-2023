@@ -9,18 +9,17 @@ fn main() {
 }
 
 fn aggregate_scratch_its(lines: Vec<String>) -> u32 {
-    let mut collection = Vec::<u32>::new();
+    let mut collection: Vec<u32> = vec![1; lines.len()];
 
-    for line in lines {
+    for (row, line) in (0_u32..).zip(lines) {
         let game = parse_game(line);
         let win_count = game.winning.intersection(&game.actual).count() as u32;
-        let points = if win_count > 0 {
-            2_u32.pow(win_count - 1)
-        } else {
-            0_u32
-        };
 
-        collection.push(points);
+        for i in (row + 1)..=(win_count + row) {
+            if i < collection.len() as u32 {
+                collection[i as usize] += collection[row as usize];
+            }
+        }
     }
 
     let result = &collection.iter().sum::<u32>();
@@ -43,7 +42,7 @@ mod tests {
                 "Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36".to_string(),
                 "Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11".to_string()
             ]),
-            13
+            30
         );
     }
 }
