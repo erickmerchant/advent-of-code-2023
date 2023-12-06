@@ -2,6 +2,7 @@ pub mod day1;
 pub mod day2;
 pub mod day3;
 pub mod day4;
+pub mod day5;
 
 use clap::{Parser, ValueEnum};
 use std::io::{self, BufRead};
@@ -28,6 +29,9 @@ enum Days {
 
     #[clap(name = "4")]
     Day4,
+
+    #[clap(name = "5")]
+    Day5,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -53,6 +57,8 @@ fn main() {
         (Days::Day3, Parts::Part2) => day3::part2(input),
         (Days::Day4, Parts::Part1) => day4::part1(input),
         (Days::Day4, Parts::Part2) => day4::part2(input),
+        (Days::Day5, Parts::Part1) => day5::part1(input),
+        (Days::Day5, Parts::Part2) => day5::part2(input),
     };
 
     println!("{output}");
