@@ -1,9 +1,22 @@
 use once_cell::sync::Lazy;
 use regex::Regex;
 
-pub fn part1(input: Vec<String>) -> u32 {
+#[derive(Debug, Eq, PartialEq)]
+struct Colors {
+    red: usize,
+    green: usize,
+    blue: usize,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+struct Game {
+    id: usize,
+    highs: Colors,
+}
+
+pub fn part1(input: Vec<String>) -> usize {
     let maxes = parse_colors("12 red cubes, 13 green cubes, and 14 blue cubes".to_string());
-    let mut collection = Vec::<u32>::new();
+    let mut collection = Vec::<usize>::new();
 
     for line in input {
         let game = parse_game(line);
@@ -16,13 +29,13 @@ pub fn part1(input: Vec<String>) -> u32 {
         }
     }
 
-    let result = &collection.iter().sum::<u32>();
+    let result = &collection.iter().sum::<usize>();
 
     *result
 }
 
-pub fn part2(input: Vec<String>) -> u32 {
-    let mut collection = Vec::<u32>::new();
+pub fn part2(input: Vec<String>) -> usize {
+    let mut collection = Vec::<usize>::new();
 
     for line in input {
         let game = parse_game(line);
@@ -30,22 +43,9 @@ pub fn part2(input: Vec<String>) -> u32 {
         collection.push(game.highs.red * game.highs.green * game.highs.blue);
     }
 
-    let result = &collection.iter().sum::<u32>();
+    let result = &collection.iter().sum::<usize>();
 
     *result
-}
-
-#[derive(Debug, Eq, PartialEq)]
-struct Colors {
-    red: u32,
-    green: u32,
-    blue: u32,
-}
-
-#[derive(Debug, Eq, PartialEq)]
-struct Game {
-    id: u32,
-    highs: Colors,
 }
 
 fn parse_colors(line: String) -> Colors {
@@ -59,7 +59,7 @@ fn parse_colors(line: String) -> Colors {
     };
 
     for (_, [count, color]) in COLOR_REGEX.captures_iter(&line).map(|c| c.extract()) {
-        let count = count.parse::<u32>().expect("should be a valid u32");
+        let count = count.parse::<usize>().expect("should be a valid usize");
 
         match color {
             "red" => {
@@ -99,8 +99,8 @@ fn parse_game(line: String) -> Game {
         .captures(line.as_str())
         .expect("should be able to capture");
     let id = &captures["id"]
-        .parse::<u32>()
-        .expect("should be a valid u32");
+        .parse::<usize>()
+        .expect("should be a valid usize");
 
     Game {
         id: *id,
@@ -112,93 +112,27 @@ fn parse_game(line: String) -> Game {
 mod tests {
     use super::*;
 
-    fn get_fixture() -> Vec<(String, Game)> {
-        vec![
-            (
-                "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green".to_string(),
-                Game {
-                    id: 1,
-                    highs: Colors {
-                        red: 4,
-                        green: 2,
-                        blue: 6,
-                    },
-                },
-            ),
-            (
-                "Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue".to_string(),
-                Game {
-                    id: 2,
-                    highs: Colors {
-                        red: 1,
-                        green: 3,
-                        blue: 4,
-                    },
-                },
-            ),
-            (
-                "Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red"
-                    .to_string(),
-                Game {
-                    id: 3,
-                    highs: Colors {
-                        red: 20,
-                        green: 13,
-                        blue: 6,
-                    },
-                },
-            ),
-            (
-                "Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red"
-                    .to_string(),
-                Game {
-                    id: 4,
-                    highs: Colors {
-                        red: 14,
-                        green: 3,
-                        blue: 15,
-                    },
-                },
-            ),
-            (
-                "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green".to_string(),
-                Game {
-                    id: 5,
-                    highs: Colors {
-                        red: 6,
-                        green: 3,
-                        blue: 2,
-                    },
-                },
-            ),
-        ]
-    }
-
-    #[test]
-    fn test_parse_game() {
-        let fixture = get_fixture();
-
-        for (line, expected) in fixture {
-            assert_eq!(parse_game(line), expected);
-        }
+    fn get_fixture() -> Vec<String> {
+        "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+        Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+        Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
+        Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
+        Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green"
+            .split('\n')
+            .map(|s| s.trim().to_string())
+            .collect()
     }
 
     #[test]
     fn test_part1() {
-        let input = get_fixture()
-            .into_iter()
-            .map(|(line, _)| line)
-            .collect::<Vec<String>>();
+        let input = get_fixture();
 
         assert_eq!(part1(input), 8);
     }
 
     #[test]
     fn test_part2() {
-        let input = get_fixture()
-            .into_iter()
-            .map(|(line, _)| line)
-            .collect::<Vec<String>>();
+        let input = get_fixture();
 
         assert_eq!(part2(input), 2286);
     }

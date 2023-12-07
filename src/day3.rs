@@ -1,7 +1,13 @@
 use std::collections::{HashMap, HashSet};
 
-pub fn part1(input: Vec<String>) -> u32 {
-    let mut collection = Vec::<u32>::new();
+#[derive(Default, PartialEq, Eq, Debug)]
+struct Number {
+    value: usize,
+    field: CoordsSet,
+}
+
+pub fn part1(input: Vec<String>) -> usize {
+    let mut collection = Vec::<usize>::new();
     let (symbols, numbers) = parse_input(input);
     let symbol_locations: CoordsSet = symbols.keys().cloned().collect();
 
@@ -11,18 +17,18 @@ pub fn part1(input: Vec<String>) -> u32 {
         }
     }
 
-    let result = &collection.iter().sum::<u32>();
+    let result = &collection.iter().sum::<usize>();
 
     *result
 }
 
-pub fn part2(input: Vec<String>) -> u32 {
-    let mut collection = Vec::<u32>::new();
+pub fn part2(input: Vec<String>) -> usize {
+    let mut collection = Vec::<usize>::new();
     let (symbols, numbers) = parse_input(input);
 
     for (location, symbol) in symbols {
         if symbol == '*' {
-            let mut part_numbers = Vec::<u32>::new();
+            let mut part_numbers = Vec::<usize>::new();
 
             for number in &numbers {
                 if number.field.contains(&location) {
@@ -36,18 +42,12 @@ pub fn part2(input: Vec<String>) -> u32 {
         }
     }
 
-    let result = &collection.iter().sum::<u32>();
+    let result = &collection.iter().sum::<usize>();
 
     *result
 }
 
-#[derive(Default, PartialEq, Eq, Debug)]
-struct Number {
-    value: u32,
-    field: CoordsSet,
-}
-
-type Coords = (u32, u32);
+type Coords = (usize, usize);
 type CoordsSet = HashSet<Coords>;
 type SymbolMap = HashMap<Coords, char>;
 type NumberList = Vec<Number>;
@@ -58,11 +58,14 @@ fn parse_input(input: Vec<String>) -> Output {
     let mut numbers = NumberList::new();
     let mut current: Number = Default::default();
 
-    for (row, line) in (0_u32..).zip(input) {
-        for (column, char) in (0_u32..).zip(line.chars()) {
+    for (row, line) in (0..).zip(input) {
+        for (column, char) in (0..).zip(line.chars()) {
             if char.is_ascii_digit() {
                 current.value = (current.value * 10)
-                    + char.to_string().parse::<u32>().expect("should be a number");
+                    + char
+                        .to_string()
+                        .parse::<usize>()
+                        .expect("should be a number");
 
                 if row > 0 && column > 0 {
                     current.field.insert((row - 1, column - 1));
@@ -106,18 +109,19 @@ mod tests {
     use super::*;
 
     fn get_fixture() -> Vec<String> {
-        vec![
-            "467..114..".to_string(),
-            "...*......".to_string(),
-            "..35..633.".to_string(),
-            "......#...".to_string(),
-            "617*......".to_string(),
-            ".....+.58.".to_string(),
-            "..592.....".to_string(),
-            "......755.".to_string(),
-            "...$.*....".to_string(),
-            ".664.598..".to_string(),
-        ]
+        "467..114..
+        ...*......
+        ..35..633.
+        ......#...
+        617*......
+        .....+.58.
+        ..592.....
+        ......755.
+        ...$.*....
+        .664.598.."
+            .split('\n')
+            .map(|s| s.trim().to_string())
+            .collect()
     }
 
     #[test]

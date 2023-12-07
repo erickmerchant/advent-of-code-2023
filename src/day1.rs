@@ -1,28 +1,20 @@
-pub fn part1(input: Vec<String>) -> u32 {
-    let mut collection = Vec::<u32>::new();
+pub fn part1(input: Vec<String>) -> usize {
+    let collection = input.iter().map(|line| parse_numbers(line.as_str()));
 
-    for line in input {
-        collection.push(parse_numbers(line));
-    }
-
-    let result = &collection.iter().sum::<u32>();
+    let result = &collection.sum::<usize>();
 
     *result
 }
 
-pub fn part2(input: Vec<String>) -> u32 {
-    let mut collection = Vec::<u32>::new();
+pub fn part2(input: Vec<String>) -> usize {
+    let collection = input.iter().map(|line| parse_numbers_plus(line.as_str()));
 
-    for line in input {
-        collection.push(parse_numbers_plus(line));
-    }
-
-    let result = &collection.iter().sum::<u32>();
+    let result = &collection.sum::<usize>();
 
     *result
 }
 
-fn parse_numbers(line: String) -> u32 {
+fn parse_numbers(line: &str) -> usize {
     let filtered = line
         .chars()
         .filter(|c| c.is_ascii_digit())
@@ -31,19 +23,19 @@ fn parse_numbers(line: String) -> u32 {
         .first()
         .expect("should have a first")
         .to_string()
-        .parse::<u32>()
+        .parse::<usize>()
         .expect("should parse a number here");
     let last = filtered
         .last()
         .expect("should have a last")
         .to_string()
-        .parse::<u32>()
+        .parse::<usize>()
         .expect("should parse a number here");
 
     (first * 10) + last
 }
 
-fn parse_numbers_plus(line: String) -> u32 {
+fn parse_numbers_plus(line: &str) -> usize {
     let line = line
         .replace("zero", "zero0zero")
         .replace("one", "one1one")
@@ -56,68 +48,46 @@ fn parse_numbers_plus(line: String) -> u32 {
         .replace("eight", "eight8eight")
         .replace("nine", "nine9nine");
 
-    parse_numbers(line)
+    parse_numbers(&line)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn get_fixture1() -> Vec<(String, u32)> {
-        vec![
-            ("1abc2".to_string(), 12),
-            ("pqr3stu8vwx".to_string(), 38),
-            ("a1b2c3d4e5f".to_string(), 15),
-            ("treb7uchet".to_string(), 77),
-        ]
+    fn get_fixture1() -> Vec<String> {
+        "1abc2
+        pqr3stu8vwx
+        a1b2c3d4e5f
+        treb7uchet"
+            .split('\n')
+            .map(|s| s.trim().to_string())
+            .collect()
     }
 
-    #[test]
-    fn test_parse_numbers() {
-        let fixture1 = get_fixture1();
-
-        for (line, expected) in fixture1 {
-            assert_eq!(parse_numbers(line), expected);
-        }
-    }
-
-    fn get_fixture2() -> Vec<(String, u32)> {
-        vec![
-            ("two1nine".to_string(), 29),
-            ("eightwothree".to_string(), 83),
-            ("abcone2threexyz".to_string(), 13),
-            ("xtwone3four".to_string(), 24),
-            ("4nineeightseven2".to_string(), 42),
-            ("zoneight234".to_string(), 14),
-            ("7pqrstsixteen".to_string(), 76),
-        ]
-    }
-
-    #[test]
-    fn test_parse_numbers_plus() {
-        let fixture2 = get_fixture2();
-
-        for (line, expected) in fixture2 {
-            assert_eq!(parse_numbers_plus(line), expected);
-        }
+    fn get_fixture2() -> Vec<String> {
+        "two1nine
+        eightwothree
+        abcone2threexyz
+        xtwone3four
+        4nineeightseven2
+        zoneight234
+        7pqrstsixteen"
+            .split('\n')
+            .map(|s| s.trim().to_string())
+            .collect()
     }
 
     #[test]
     fn test_part1() {
-        let fixture1 = get_fixture1()
-            .into_iter()
-            .map(|(line, _)| line)
-            .collect::<Vec<String>>();
+        let fixture1 = get_fixture1();
 
         assert_eq!(part1(fixture1), 142);
     }
 
     #[test]
     fn test_part2() {
-        let fixture2 = get_fixture2()
-            .into_iter()
-            .map(|(line, _)| line)
-            .collect::<Vec<String>>();
+        let fixture2 = get_fixture2();
 
         assert_eq!(part2(fixture2), 281);
     }
