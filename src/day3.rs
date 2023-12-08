@@ -1,5 +1,11 @@
 use std::collections::{HashMap, HashSet};
 
+type Coords = (usize, usize);
+type CoordsSet = HashSet<Coords>;
+type SymbolMap = HashMap<Coords, char>;
+type NumberList = Vec<Number>;
+type Output = (SymbolMap, NumberList);
+
 #[derive(Default, PartialEq, Eq, Debug)]
 struct Number {
     value: usize,
@@ -46,12 +52,6 @@ pub fn part2(input: Vec<String>) -> usize {
 
     *result
 }
-
-type Coords = (usize, usize);
-type CoordsSet = HashSet<Coords>;
-type SymbolMap = HashMap<Coords, char>;
-type NumberList = Vec<Number>;
-type Output = (SymbolMap, NumberList);
 
 fn parse_input(input: Vec<String>) -> Output {
     let mut symbols = SymbolMap::new();
