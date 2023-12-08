@@ -1,6 +1,5 @@
 use itertools::Itertools;
 use once_cell::sync::Lazy;
-use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
 use regex::Regex;
 
@@ -17,19 +16,19 @@ pub fn part1(input: Vec<String>) -> usize {
     let seeds = parse_seeds1(input[0].to_owned());
     let maps = parse_maps(input[1..].to_owned());
 
-    get_lowest((seeds, maps))
+    get_lowest(seeds, maps)
 }
 
 pub fn part2(input: Vec<String>) -> usize {
     let seeds = parse_seeds2(input[0].to_owned());
     let maps = parse_maps(input[1..].to_owned());
 
-    get_lowest((seeds, maps))
+    get_lowest(seeds, maps)
 }
 
 static CHUNK_SIZE: isize = 1_000_000;
 
-fn get_lowest((seeds, maps): (MapList, Vec<MapList>)) -> usize {
+fn get_lowest(seeds: MapList, maps: Vec<MapList>) -> usize {
     let mut lowest = usize::MAX;
 
     for chunk_start in 0_isize.. {
