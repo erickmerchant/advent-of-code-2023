@@ -1,16 +1,17 @@
 use itertools::Itertools;
 use once_cell::sync::Lazy;
+use rayon::iter::IntoParallelRefIterator;
 use rayon::prelude::*;
 use regex::Regex;
 
+type MapList = Vec<Map>;
+
 #[derive(Debug, Clone)]
-struct MapLine {
+struct Map {
     min: isize,
     max: isize,
     modifier: isize,
 }
-
-type MapLineList = Vec<MapLine>;
 
 pub fn part1(input: Vec<String>) -> usize {
     let seeds = parse_seeds1(input[0].to_owned());
@@ -26,48 +27,72 @@ pub fn part2(input: Vec<String>) -> usize {
     get_lowest((seeds, maps))
 }
 
-fn get_lowest((seeds, map_line_list_list): (Vec<usize>, Vec<MapLineList>)) -> usize {
-    let lowest = seeds
-        .par_iter()
-        .map(|seed| {
-            let mut needle = *seed as isize;
+static CHUNK_SIZE: isize = 1_000_000;
 
-            for map_line_list in map_line_list_list.clone() {
-                let matching_map_line = map_line_list
+fn get_lowest((seeds, maps): (MapList, Vec<MapList>)) -> usize {
+    let mut lowest = usize::MAX;
+
+    for chunk_start in 0_isize.. {
+        let chunk: Vec<isize> =
+            (chunk_start * CHUNK_SIZE..(chunk_start * CHUNK_SIZE) + CHUNK_SIZE - 1).collect();
+
+        let matches: Vec<Option<usize>> = chunk
+            .par_iter()
+            .map(|start| {
+                let mut needle = start.to_owned();
+
+                for map_list in maps.clone() {
+                    let matching_map = map_list
+                        .clone()
+                        .into_iter()
+                        .find(|map| needle >= map.min && needle < map.max);
+                    let modifier = match matching_map.clone() {
+                        Some(map) => map.modifier,
+                        None => 0_isize,
+                    };
+                    let new_needle = needle + modifier;
+
+                    if new_needle >= 0 {
+                        needle = new_needle;
+                    } else {
+                        panic!("should not be negative")
+                    }
+                }
+
+                if seeds
                     .clone()
                     .into_iter()
-                    .find(|map_line| needle >= map_line.min && needle < map_line.max);
-                let modifier = match matching_map_line.clone() {
-                    Some(map_line) => map_line.modifier,
-                    None => 0_isize,
-                };
-                let new_needle = needle + modifier;
-
-                if new_needle >= 0 {
-                    needle = new_needle;
+                    .any(|seed| needle >= seed.min && needle < seed.max)
+                {
+                    Some(start.to_owned() as usize)
                 } else {
-                    panic!("should not be negative")
+                    None
                 }
-            }
+            })
+            .collect();
 
-            needle
-        })
-        .min()
-        .expect("should be a valid number");
+        let matches: Vec<usize> = matches.into_iter().flatten().collect();
 
-    lowest as usize
+        if let Some(min) = matches.iter().min() {
+            lowest = *min;
+
+            break;
+        }
+    }
+
+    lowest
 }
 
-fn parse_maps(input: Vec<String>) -> Vec<MapLineList> {
+fn parse_maps(input: Vec<String>) -> Vec<MapList> {
     let steps = input
         .join("\n")
         .split("\n\n")
         .map(|s| s.trim().to_string())
         .collect::<Vec<String>>();
-    let mut maps: Vec<MapLineList> = Vec::new();
+    let mut maps: Vec<MapList> = Vec::new();
 
     for step in steps {
-        let mut current_map = MapLineList::new();
+        let mut current_map = MapList::new();
 
         for (i, line) in (0..).zip(
             step.split('\n')
@@ -75,18 +100,18 @@ fn parse_maps(input: Vec<String>) -> Vec<MapLineList> {
                 .collect::<Vec<String>>(),
         ) {
             if i == 0 {
-                current_map = MapLineList::new();
+                current_map = MapList::new();
 
                 continue;
             }
 
-            let (to, from, length) = line
+            let (from, to, length) = line
                 .split(' ')
                 .map(|s| s.parse::<usize>().expect("should be a valid usize"))
                 .collect_tuple()
                 .expect("should be a tuple of three numbers");
 
-            current_map.push(MapLine {
+            current_map.push(Map {
                 min: from as isize,
                 max: ((from as isize) + (length as isize)),
                 modifier: (to as isize) - (from as isize),
@@ -96,10 +121,12 @@ fn parse_maps(input: Vec<String>) -> Vec<MapLineList> {
         maps.push(current_map);
     }
 
+    maps.reverse();
+
     maps
 }
 
-fn parse_seeds1(line: String) -> Vec<usize> {
+fn parse_seeds2(line: String) -> MapList {
     static SEED_REGEX: Lazy<Regex> =
         Lazy::new(|| Regex::new(r"seeds: (?P<seeds>.*)").expect("should be a valid regex"));
 
@@ -107,27 +134,39 @@ fn parse_seeds1(line: String) -> Vec<usize> {
         .captures(line.as_str())
         .expect("should be able to capture");
 
-    captures["seeds"]
+    let seeds: Vec<usize> = captures["seeds"]
         .split(' ')
         .map(|s| s.parse::<usize>().expect("should be a valid usize"))
-        .collect()
-}
+        .collect();
 
-fn parse_seeds2(line: String) -> Vec<usize> {
-    let seeds = parse_seeds1(line);
-    let mut new_seeds: Vec<usize> = Vec::new();
+    let mut maps = MapList::new();
 
     for chunk in seeds.chunks(2) {
         if chunk.len() != 2 {
             panic!("should be a chunk of two");
         }
 
-        let mut range: Vec<usize> = (chunk[0]..(chunk[0] + chunk[1])).collect();
+        let (from, length) = chunk
+            .iter()
+            .collect_tuple()
+            .expect("should be a tuple of two numbers");
 
-        new_seeds.append(&mut range);
+        maps.push(Map {
+            min: *from as isize,
+            max: ((*from as isize) + (*length as isize)),
+            modifier: 0,
+        });
     }
 
-    new_seeds
+    maps
+}
+
+fn parse_seeds1(line: String) -> MapList {
+    let re = Regex::new(r"(\d+)").expect("should be a valid regex");
+
+    let line = re.replace_all(line.as_str(), "$1 1");
+
+    parse_seeds2(line.to_string())
 }
 
 #[cfg(test)]
