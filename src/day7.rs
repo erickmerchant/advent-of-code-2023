@@ -9,16 +9,14 @@ struct Hand {
 }
 
 pub fn part1(input: Vec<String>) -> usize {
-    let mut hands: Vec<Hand> = Vec::new();
+    let mut hands: Vec<Hand> = Default::default();
 
     for line in input {
         let (cards, score) = line
             .split(' ')
             .collect_tuple()
             .expect("should be a tuple of two");
-
         let score = score.parse::<usize>().expect("should be a number");
-
         let cards = cards.chars().map(|c| match c {
             'T' => 'A',
             'J' => 'B',
@@ -27,8 +25,7 @@ pub fn part1(input: Vec<String>) -> usize {
             'A' => 'E',
             _ => c,
         });
-
-        let mut card_frequency_map: HashMap<char, usize> = HashMap::new();
+        let mut card_frequency_map: HashMap<char, usize> = Default::default();
 
         for card in cards.clone() {
             if card == '0' {

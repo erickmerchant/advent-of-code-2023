@@ -13,7 +13,7 @@ struct Number {
 }
 
 pub fn part1(input: Vec<String>) -> usize {
-    let mut collection = Vec::<usize>::new();
+    let mut collection: Vec<usize> = Default::default();
     let (symbols, numbers) = parse_input(input);
     let symbol_locations: CoordsSet = symbols.keys().cloned().collect();
 
@@ -23,18 +23,18 @@ pub fn part1(input: Vec<String>) -> usize {
         }
     }
 
-    let result = &collection.iter().sum::<usize>();
+    let result = &collection.iter().sum();
 
     *result
 }
 
 pub fn part2(input: Vec<String>) -> usize {
-    let mut collection = Vec::<usize>::new();
+    let mut collection: Vec<usize> = Default::default();
     let (symbols, numbers) = parse_input(input);
 
     for (location, symbol) in symbols {
         if symbol == '*' {
-            let mut part_numbers = Vec::<usize>::new();
+            let mut part_numbers: Vec<usize> = Default::default();
 
             for number in &numbers {
                 if number.field.contains(&location) {
@@ -48,7 +48,7 @@ pub fn part2(input: Vec<String>) -> usize {
         }
     }
 
-    let result = &collection.iter().sum::<usize>();
+    let result = &collection.iter().sum();
 
     *result
 }
@@ -56,7 +56,7 @@ pub fn part2(input: Vec<String>) -> usize {
 fn parse_input(input: Vec<String>) -> Output {
     let mut symbols = SymbolMap::new();
     let mut numbers = NumberList::new();
-    let mut current: Number = Default::default();
+    let mut current = Number::default();
 
     for (row, line) in (0..).zip(input) {
         for (column, char) in (0..).zip(line.chars()) {
@@ -95,7 +95,7 @@ fn parse_input(input: Vec<String>) -> Output {
 
                 if current.value > 0 {
                     numbers.push(current);
-                    current = Default::default();
+                    current = Number::default();
                 }
             }
         }

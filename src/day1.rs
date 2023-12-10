@@ -1,24 +1,19 @@
 pub fn part1(input: Vec<String>) -> usize {
     let collection = input.iter().map(|line| parse_numbers(line.as_str()));
-
-    let result = &collection.sum::<usize>();
+    let result = &collection.sum();
 
     *result
 }
 
 pub fn part2(input: Vec<String>) -> usize {
     let collection = input.iter().map(|line| parse_numbers_plus(line.as_str()));
-
     let result = &collection.sum::<usize>();
 
     *result
 }
 
 fn parse_numbers(line: &str) -> usize {
-    let filtered = line
-        .chars()
-        .filter(|c| c.is_ascii_digit())
-        .collect::<Vec<char>>();
+    let filtered: Vec<char> = line.chars().filter(|c| c.is_ascii_digit()).collect();
     let first = filtered
         .first()
         .expect("should have a first")

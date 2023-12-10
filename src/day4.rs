@@ -12,7 +12,7 @@ struct Game {
 }
 
 pub fn part1(input: Vec<String>) -> usize {
-    let mut collection = Vec::<usize>::new();
+    let mut collection: Vec<usize> = Default::default();
 
     for line in input {
         let game = parse_game(line);
@@ -26,7 +26,7 @@ pub fn part1(input: Vec<String>) -> usize {
         collection.push(points);
     }
 
-    let result = &collection.iter().sum::<usize>();
+    let result = &collection.iter().sum();
 
     *result
 }
@@ -45,7 +45,7 @@ pub fn part2(input: Vec<String>) -> usize {
         }
     }
 
-    let result = &collection.iter().sum::<usize>();
+    let result = &collection.iter().sum();
 
     *result
 }
@@ -70,11 +70,11 @@ fn parse_game(line: String) -> Game {
         winning: captures["winning"]
             .split(' ')
             .map(|c| c.parse::<usize>().expect("should be a valid usize"))
-            .collect::<NumberSet>(),
+            .collect(),
         actual: captures["actual"]
             .split(' ')
             .map(|c| c.parse::<usize>().expect("should be a valid usize"))
-            .collect::<NumberSet>(),
+            .collect(),
     }
 }
 

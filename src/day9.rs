@@ -8,12 +8,11 @@ pub fn part1(input: Vec<String>) -> usize {
                 .split(' ')
                 .map(|s| s.parse::<isize>().expect("should be a valid number"))
                 .collect();
-
             let mut results = vec![numbers];
 
             loop {
                 let prev_numbers = results.last().expect("should have a last result");
-                let mut numbers: Vec<isize> = vec![];
+                let mut numbers: Vec<isize> = Default::default();
 
                 for (i, n) in (0..).zip(prev_numbers) {
                     if i < prev_numbers.len() - 1 {

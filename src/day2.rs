@@ -16,7 +16,7 @@ struct Game {
 
 pub fn part1(input: Vec<String>) -> usize {
     let maxes = parse_colors("12 red cubes, 13 green cubes, and 14 blue cubes".to_string());
-    let mut collection = Vec::<usize>::new();
+    let mut collection: Vec<usize> = Default::default();
 
     for line in input {
         let game = parse_game(line);
@@ -29,13 +29,13 @@ pub fn part1(input: Vec<String>) -> usize {
         }
     }
 
-    let result = &collection.iter().sum::<usize>();
+    let result = &collection.iter().sum();
 
     *result
 }
 
 pub fn part2(input: Vec<String>) -> usize {
-    let mut collection = Vec::<usize>::new();
+    let mut collection: Vec<usize> = Default::default();
 
     for line in input {
         let game = parse_game(line);
@@ -43,7 +43,7 @@ pub fn part2(input: Vec<String>) -> usize {
         collection.push(game.highs.red * game.highs.green * game.highs.blue);
     }
 
-    let result = &collection.iter().sum::<usize>();
+    let result = &collection.iter().sum();
 
     *result
 }

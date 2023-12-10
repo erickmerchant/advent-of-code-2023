@@ -29,7 +29,7 @@ pub fn part2(input: Vec<String>) -> usize {
 }
 
 fn get_lowest1(seeds: Vec<isize>, maps: Vec<MapList>) -> usize {
-    let locations = seeds
+    let locations: Vec<usize> = seeds
         .par_iter()
         .map(|seed| {
             let mut needle = seed.to_owned();
@@ -39,7 +39,6 @@ fn get_lowest1(seeds: Vec<isize>, maps: Vec<MapList>) -> usize {
                     .clone()
                     .into_iter()
                     .find(|map| needle >= map.b && needle < map.b + map.len);
-
                 let modifier = match matching_map.clone() {
                     Some(map) => map.a - map.b,
                     None => 0_isize,
@@ -55,8 +54,7 @@ fn get_lowest1(seeds: Vec<isize>, maps: Vec<MapList>) -> usize {
 
             needle as usize
         })
-        .collect::<Vec<usize>>();
-
+        .collect();
     let lowest = locations.iter().min().expect("should have a minimum");
 
     lowest.to_owned()
@@ -70,7 +68,6 @@ fn get_lowest2(seeds: MapList, maps: Vec<MapList>) -> usize {
     for chunk_start in 0_isize.. {
         let chunk: Vec<isize> =
             (chunk_start * CHUNK_SIZE..(chunk_start * CHUNK_SIZE) + CHUNK_SIZE - 1).collect();
-
         let matches: Vec<Option<usize>> = chunk
             .par_iter()
             .map(|start| {
@@ -105,7 +102,6 @@ fn get_lowest2(seeds: MapList, maps: Vec<MapList>) -> usize {
                 }
             })
             .collect();
-
         let matches: Vec<usize> = matches.into_iter().flatten().collect();
 
         if let Some(min) = matches.iter().min() {
@@ -119,12 +115,12 @@ fn get_lowest2(seeds: MapList, maps: Vec<MapList>) -> usize {
 }
 
 fn parse_maps(input: Vec<String>) -> Vec<MapList> {
-    let steps = input
+    let steps: Vec<String> = input
         .join("\n")
         .split("\n\n")
         .map(|s| s.trim().to_string())
-        .collect::<Vec<String>>();
-    let mut maps: Vec<MapList> = Vec::new();
+        .collect();
+    let mut maps: Vec<MapList> = Default::default();
 
     for step in steps {
         let mut current_map = MapList::new();
@@ -171,7 +167,6 @@ fn parse_seeds1(line: String) -> Vec<isize> {
 
 fn parse_seeds2(line: String) -> MapList {
     let seeds = parse_seeds1(line);
-
     let mut maps = MapList::new();
 
     for chunk in seeds.chunks(2) {

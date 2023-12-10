@@ -5,7 +5,6 @@ use std::collections::HashMap;
 pub fn part1(input: Vec<String>) -> usize {
     let (steps, nodes) = parse_input(input);
     let steps_len = steps.len();
-
     let mut count = 0;
     let mut current = "AAA".to_string();
 
@@ -35,12 +34,7 @@ pub fn part1(input: Vec<String>) -> usize {
 pub fn part2(input: Vec<String>) -> usize {
     let (steps, nodes) = parse_input(input);
     let steps_len = steps.len();
-
-    let currents = nodes
-        .keys()
-        .filter(|k| k.ends_with('A'))
-        .collect::<Vec<&String>>();
-
+    let currents: Vec<&String> = nodes.keys().filter(|k| k.ends_with('A')).collect();
     let numbers: Vec<usize> = currents
         .par_iter()
         .map(|current| {
@@ -70,7 +64,6 @@ pub fn part2(input: Vec<String>) -> usize {
             count
         })
         .collect();
-
     let mut count = numbers[0];
 
     for &number in numbers.iter().skip(1) {
@@ -81,13 +74,12 @@ pub fn part2(input: Vec<String>) -> usize {
 }
 
 fn parse_input(input: Vec<String>) -> (Vec<String>, HashMap<String, (String, String)>) {
-    let steps = input[0]
+    let steps: Vec<String> = input[0]
         .split("")
         .filter(|s| s != &"")
         .map(|s| s.to_string())
-        .collect::<Vec<String>>();
-
-    let mut nodes: HashMap<String, (String, String)> = HashMap::new();
+        .collect();
+    let mut nodes: HashMap<String, (String, String)> = Default::default();
     let node_re = Regex::new(r"(?P<name>\w+) = \((?P<left>\w+), (?P<right>\w+)\)")
         .expect("should be a valid regex");
 
