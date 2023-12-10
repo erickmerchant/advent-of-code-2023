@@ -1,18 +1,18 @@
 use rayon::prelude::*;
 
 pub fn part1(input: Vec<String>) -> usize {
-    let sum: isize = input
+    let sum = input
         .par_iter()
         .map(|line| {
-            let numbers: Vec<isize> = line
+            let numbers = line
                 .split(' ')
                 .map(|s| s.parse::<isize>().expect("should be a valid number"))
-                .collect();
+                .collect::<Vec<_>>();
             let mut results = vec![numbers];
 
             loop {
                 let prev_numbers = results.last().expect("should have a last result");
-                let mut numbers: Vec<isize> = Default::default();
+                let mut numbers = Vec::new();
 
                 for (i, n) in (0..).zip(prev_numbers) {
                     if i < prev_numbers.len() - 1 {
@@ -39,22 +39,22 @@ pub fn part1(input: Vec<String>) -> usize {
 
             result
         })
-        .sum();
+        .sum::<isize>();
 
     sum as usize
 }
 
 pub fn part2(input: Vec<String>) -> usize {
-    let input: Vec<String> = input
+    let input = input
         .iter()
         .map(|line| {
-            let mut split: Vec<String> = line.split(' ').map(|s| s.to_string()).collect();
+            let mut split = line.split(' ').map(|s| s.to_string()).collect::<Vec<_>>();
 
             split.reverse();
 
             split.join(" ")
         })
-        .collect();
+        .collect::<Vec<_>>();
 
     part1(input)
 }

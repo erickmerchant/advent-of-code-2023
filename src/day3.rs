@@ -13,9 +13,9 @@ struct Number {
 }
 
 pub fn part1(input: Vec<String>) -> usize {
-    let mut collection: Vec<usize> = Default::default();
+    let mut collection = Vec::new();
     let (symbols, numbers) = parse_input(input);
-    let symbol_locations: CoordsSet = symbols.keys().cloned().collect();
+    let symbol_locations = symbols.keys().cloned().collect::<_>();
 
     for number in numbers {
         if number.field.intersection(&symbol_locations).count() > 0 {
@@ -29,12 +29,12 @@ pub fn part1(input: Vec<String>) -> usize {
 }
 
 pub fn part2(input: Vec<String>) -> usize {
-    let mut collection: Vec<usize> = Default::default();
+    let mut collection = Vec::new();
     let (symbols, numbers) = parse_input(input);
 
     for (location, symbol) in symbols {
         if symbol == '*' {
-            let mut part_numbers: Vec<usize> = Default::default();
+            let mut part_numbers = Vec::new();
 
             for number in &numbers {
                 if number.field.contains(&location) {

@@ -4,17 +4,17 @@ use regex::Regex;
 pub fn part1(input: Vec<String>) -> usize {
     let times = parse_numbers(input[0].clone());
     let distances = parse_numbers(input[1].clone());
-    let races: Vec<(usize, usize)> = times.into_iter().zip(distances).collect();
+    let races = times.into_iter().zip(distances).collect::<Vec<_>>();
 
     get_result(races)
 }
 
 pub fn part2(input: Vec<String>) -> usize {
     let re = Regex::new(r"(\d)\s+").expect("should be a valid regex");
-    let input: Vec<String> = input
+    let input = input
         .iter()
         .map(|line| re.replace_all(line, "$1").to_string())
-        .collect();
+        .collect::<Vec<_>>();
 
     part1(input)
 }

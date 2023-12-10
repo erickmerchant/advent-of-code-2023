@@ -29,7 +29,7 @@ pub fn part2(input: Vec<String>) -> usize {
 }
 
 fn get_lowest1(seeds: Vec<isize>, maps: Vec<MapList>) -> usize {
-    let locations: Vec<usize> = seeds
+    let locations = seeds
         .par_iter()
         .map(|seed| {
             let mut needle = seed.to_owned();
@@ -54,21 +54,21 @@ fn get_lowest1(seeds: Vec<isize>, maps: Vec<MapList>) -> usize {
 
             needle as usize
         })
-        .collect();
+        .collect::<Vec<_>>();
     let lowest = locations.iter().min().expect("should have a minimum");
 
     lowest.to_owned()
 }
 
-static CHUNK_SIZE: isize = 1_000;
+const CHUNK_SIZE: isize = 1_000;
 
 fn get_lowest2(seeds: MapList, maps: Vec<MapList>) -> usize {
     let mut lowest = usize::MAX;
 
     for chunk_start in 0_isize.. {
-        let chunk: Vec<isize> =
-            (chunk_start * CHUNK_SIZE..(chunk_start * CHUNK_SIZE) + CHUNK_SIZE - 1).collect();
-        let matches: Vec<Option<usize>> = chunk
+        let chunk = (chunk_start * CHUNK_SIZE..(chunk_start * CHUNK_SIZE) + CHUNK_SIZE - 1)
+            .collect::<Vec<_>>();
+        let matches = chunk
             .par_iter()
             .map(|start| {
                 let mut needle = start.to_owned();
@@ -101,8 +101,8 @@ fn get_lowest2(seeds: MapList, maps: Vec<MapList>) -> usize {
                     None
                 }
             })
-            .collect();
-        let matches: Vec<usize> = matches.into_iter().flatten().collect();
+            .collect::<Vec<_>>();
+        let matches = matches.into_iter().flatten().collect::<Vec<_>>();
 
         if let Some(min) = matches.iter().min() {
             lowest = *min;
@@ -115,12 +115,12 @@ fn get_lowest2(seeds: MapList, maps: Vec<MapList>) -> usize {
 }
 
 fn parse_maps(input: Vec<String>) -> Vec<MapList> {
-    let steps: Vec<String> = input
+    let steps = input
         .join("\n")
         .split("\n\n")
         .map(|s| s.trim().to_string())
-        .collect();
-    let mut maps: Vec<MapList> = Default::default();
+        .collect::<Vec<_>>();
+    let mut maps = Vec::new();
 
     for step in steps {
         let mut current_map = MapList::new();

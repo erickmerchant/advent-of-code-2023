@@ -12,7 +12,7 @@ struct Game {
 }
 
 pub fn part1(input: Vec<String>) -> usize {
-    let mut collection: Vec<usize> = Default::default();
+    let mut collection = Vec::new();
 
     for line in input {
         let game = parse_game(line);
@@ -32,7 +32,7 @@ pub fn part1(input: Vec<String>) -> usize {
 }
 
 pub fn part2(input: Vec<String>) -> usize {
-    let mut collection: Vec<usize> = vec![1; input.len()];
+    let mut collection = vec![1; input.len()];
 
     for (row, line) in (0..).zip(input) {
         let game = parse_game(line);

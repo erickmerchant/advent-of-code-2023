@@ -9,7 +9,7 @@ struct Hand {
 }
 
 pub fn part1(input: Vec<String>) -> usize {
-    let mut hands: Vec<Hand> = Default::default();
+    let mut hands = Vec::new();
 
     for line in input {
         let (cards, score) = line
@@ -25,7 +25,7 @@ pub fn part1(input: Vec<String>) -> usize {
             'A' => 'E',
             _ => c,
         });
-        let mut card_frequency_map: HashMap<char, usize> = Default::default();
+        let mut card_frequency_map = HashMap::new();
 
         for card in cards.clone() {
             if card == '0' {
@@ -62,9 +62,9 @@ pub fn part1(input: Vec<String>) -> usize {
             sum => sum,
         };
 
-        let cards: (char, char, char, char, char) = cards
+        let cards = cards
             .into_iter()
-            .collect_tuple()
+            .collect_tuple::<(char, char, char, char, char)>()
             .expect("should be a tuple of 5");
 
         hands.push(Hand {
@@ -91,7 +91,10 @@ pub fn part1(input: Vec<String>) -> usize {
 }
 
 pub fn part2(input: Vec<String>) -> usize {
-    let input: Vec<String> = input.iter().map(|line| line.replace('J', "0")).collect();
+    let input = input
+        .iter()
+        .map(|line| line.replace('J', "0"))
+        .collect::<Vec<_>>();
 
     part1(input)
 }

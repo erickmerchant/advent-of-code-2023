@@ -34,8 +34,11 @@ pub fn part1(input: Vec<String>) -> usize {
 pub fn part2(input: Vec<String>) -> usize {
     let (steps, nodes) = parse_input(input);
     let steps_len = steps.len();
-    let currents: Vec<&String> = nodes.keys().filter(|k| k.ends_with('A')).collect();
-    let numbers: Vec<usize> = currents
+    let currents = nodes
+        .keys()
+        .filter(|k| k.ends_with('A'))
+        .collect::<Vec<_>>();
+    let numbers = currents
         .par_iter()
         .map(|current| {
             let mut count = 0;
@@ -63,7 +66,7 @@ pub fn part2(input: Vec<String>) -> usize {
 
             count
         })
-        .collect();
+        .collect::<Vec<_>>();
     let mut count = numbers[0];
 
     for &number in numbers.iter().skip(1) {
@@ -74,12 +77,12 @@ pub fn part2(input: Vec<String>) -> usize {
 }
 
 fn parse_input(input: Vec<String>) -> (Vec<String>, HashMap<String, (String, String)>) {
-    let steps: Vec<String> = input[0]
+    let steps = input[0]
         .split("")
         .filter(|s| s != &"")
         .map(|s| s.to_string())
-        .collect();
-    let mut nodes: HashMap<String, (String, String)> = Default::default();
+        .collect::<Vec<_>>();
+    let mut nodes = HashMap::new();
     let node_re = Regex::new(r"(?P<name>\w+) = \((?P<left>\w+), (?P<right>\w+)\)")
         .expect("should be a valid regex");
 

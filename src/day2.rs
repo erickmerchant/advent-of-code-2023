@@ -16,7 +16,7 @@ struct Game {
 
 pub fn part1(input: Vec<String>) -> usize {
     let maxes = parse_colors("12 red cubes, 13 green cubes, and 14 blue cubes".to_string());
-    let mut collection: Vec<usize> = Default::default();
+    let mut collection = Vec::new();
 
     for line in input {
         let game = parse_game(line);
@@ -35,7 +35,7 @@ pub fn part1(input: Vec<String>) -> usize {
 }
 
 pub fn part2(input: Vec<String>) -> usize {
-    let mut collection: Vec<usize> = Default::default();
+    let mut collection = Vec::new();
 
     for line in input {
         let game = parse_game(line);
