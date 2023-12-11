@@ -41,7 +41,7 @@ fn get_lowest1(seeds: Vec<isize>, maps: Vec<MapList>) -> usize {
                     .find(|map| needle >= map.b && needle < map.b + map.len);
                 let modifier = match matching_map.clone() {
                     Some(map) => map.a - map.b,
-                    None => 0_isize,
+                    None => 0,
                 };
                 let new_needle = needle + modifier;
 
@@ -80,7 +80,7 @@ fn get_lowest2(seeds: MapList, maps: Vec<MapList>) -> usize {
                         .find(|map| needle >= map.a && needle < map.a + map.len);
                     let modifier = match matching_map.clone() {
                         Some(map) => map.b - map.a,
-                        None => 0_isize,
+                        None => 0,
                     };
                     let new_needle = needle + modifier;
 
