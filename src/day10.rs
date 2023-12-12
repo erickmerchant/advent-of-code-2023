@@ -59,7 +59,6 @@ fn get_path(input: Vec<String>) -> (char, Vec<usize>) {
         (neg_line_length, ['|', '7', 'F']),
         (line_length, ['|', 'L', 'J']),
     ];
-
     let start_connections = start_connections
         .iter()
         .filter_map(|(direction, valids)| {
