@@ -32,6 +32,7 @@ fn get_total(input: Vec<String>, rate: usize) -> usize {
 
     for (origin_row, cells) in (0..).zip(input.clone()) {
         let row = rows[0..origin_row].iter().sum::<usize>();
+
         for (origin_col, cell) in (0..).zip(cells.chars()) {
             let col = cols[0..origin_col].iter().sum::<usize>();
 
