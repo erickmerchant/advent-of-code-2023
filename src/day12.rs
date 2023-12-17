@@ -1,58 +1,120 @@
 use itertools::Itertools;
 use rayon::prelude::*;
-use regex::Regex;
+use std::collections::HashMap;
 
 pub fn part1(input: Vec<String>) -> usize {
-    get_result(input)
+    get_total(input, 1) as usize
 }
 
-pub fn part2(_input: Vec<String>) -> usize {
-    0
+pub fn part2(input: Vec<String>) -> usize {
+    get_total(input, 5) as usize
 }
 
-fn get_result(input: Vec<String>) -> usize {
-    let re = Regex::new(r"\.+").expect("should be a valid regex");
-
-    let result = input
+fn get_total(input: Vec<String>, fold: u128) -> u128 {
+    let total = input
         .par_iter()
         .map(|line| {
-            let mut count = 0;
             let parts = line.split(' ').map(|s| s.to_string()).collect::<Vec<_>>();
-            let (a_map, b_map) = parts
+            let (left, right) = parts
                 .iter()
                 .collect_tuple::<(&String, &String)>()
                 .expect("a tuple of two");
-            let b_map = b_map
+            let left = vec![left; fold as usize].iter().join("?");
+            let length = left.len() as u128;
+            let right = vec![right; fold as usize].iter().join(",");
+            let blocks = right
                 .split(',')
-                .map(|s| s.parse::<usize>().expect("should be a number"))
+                .map(|s| s.parse::<u128>().expect("should be a number"))
                 .collect_vec();
-            let slots = a_map.match_indices("?").map(|(i, _)| i);
-            let items = a_map.match_indices("#").collect::<Vec<_>>();
-            let missing_count = b_map.iter().sum::<usize>() - items.len();
-            let target_string = b_map.iter().map(|n| "#".repeat(*n)).join(" ");
+            let mut pattern = 0;
+            let mut anti_pattern = 0;
 
-            for combo in slots.combinations(missing_count) {
-                let mut c_map = a_map.clone();
-
-                for i in combo {
-                    c_map.replace_range(i..=i, "#");
-                }
-
-                let c_map = c_map.replace("?", ".");
-                let c_map = re.replace_all(c_map.as_str(), " ").to_string();
-                let c_map = c_map.trim_matches('.').to_string();
-                let c_map = c_map.trim_matches(' ').to_string();
-
-                if c_map == target_string {
-                    count += 1;
+            for (i, c) in (0..).zip(left.chars()) {
+                if c == '#' {
+                    pattern |= 1 << i;
+                } else if c == '.' {
+                    anti_pattern |= 1 << i;
                 }
             }
 
-            count
-        })
-        .sum::<usize>();
+            let mut combinations = Combinations {
+                pattern,
+                anti_pattern,
+                length,
+                cache: HashMap::new(),
+            };
 
-    result
+            let total =
+                combinations.calculate(0, 0, &blocks, blocks.iter().sum(), blocks.len() as u128);
+
+            total
+        })
+        .sum::<u128>();
+
+    total
+}
+
+struct Combinations {
+    pattern: u128,
+    anti_pattern: u128,
+    length: u128,
+    cache: HashMap<(u128, u128), u128>,
+}
+
+impl Combinations {
+    pub fn calculate(
+        &mut self,
+        value: u128,
+        min_pos: u128,
+        blocks: &[u128],
+        blocks_sum: u128,
+        blocks_length: u128,
+    ) -> u128 {
+        if self.cache.contains_key(&(min_pos, blocks_length)) {
+            return *self
+                .cache
+                .get(&(min_pos, blocks_length))
+                .expect("cache should have a value");
+        }
+
+        let mut total = 0;
+        let max_pos = self.length - (blocks_sum + blocks_length - 1);
+        let block = (0..blocks[0]).map(|i| 1 << i).sum::<u128>();
+
+        for pos in min_pos..=max_pos {
+            let block = block << pos;
+            let pattern_mask = if blocks_length == 1 {
+                (0..self.length).map(|i| 1 << i).sum::<u128>()
+            } else {
+                (0..pos).map(|i| 1 << i).sum::<u128>() | block
+            };
+            let value = value | block;
+
+            if (pattern_mask & self.anti_pattern) & value != 0 {
+                continue;
+            }
+
+            if (pattern_mask & self.pattern) & value != pattern_mask & self.pattern {
+                continue;
+            }
+
+            total += if blocks_length == 1 {
+                1
+            } else {
+                self.calculate(
+                    value,
+                    pos + blocks[0] + 1,
+                    &blocks[1..],
+                    blocks_sum - blocks[0],
+                    blocks_length - 1,
+                )
+            };
+        }
+
+        self.cache.insert((min_pos, blocks_length), total);
+
+        total
+    }
 }
 
 #[cfg(test)]
@@ -72,7 +134,8 @@ mod tests {
     }
 
     #[test]
-    fn test_get_result() {
-        assert_eq!(get_result(get_fixture()), 21);
+    fn test_get_total() {
+        assert_eq!(get_total(get_fixture(), 1), 21);
+        assert_eq!(get_total(get_fixture(), 5), 525152);
     }
 }
