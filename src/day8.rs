@@ -10,10 +10,7 @@ pub fn part1(input: Vec<String>) -> usize {
 
     loop {
         let (left, right) = nodes.get(&current).expect("should have a node");
-        let direction = steps
-            .get(count % steps_len)
-            .expect("should have a step")
-            .to_owned();
+        let direction = steps.get(count % steps_len).expect("should have a step");
 
         current = match direction.as_str() {
             "L" => left.to_owned(),
@@ -46,10 +43,7 @@ pub fn part2(input: Vec<String>) -> usize {
 
             loop {
                 let (left, right) = nodes.get(current).expect("should have a node");
-                let direction = steps
-                    .get(count % steps_len)
-                    .expect("should have a step")
-                    .to_owned();
+                let direction = steps.get(count % steps_len).expect("should have a step");
 
                 current = match direction.as_str() {
                     "L" => left,

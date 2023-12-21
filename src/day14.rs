@@ -153,8 +153,8 @@ impl Tilter {
                 .iter()
                 .rev()
             {
-                let column = column.to_owned();
-                let c = c.to_owned();
+                let column = *column;
+                let c = *c;
 
                 if c == '#' {
                     next = Some(column);

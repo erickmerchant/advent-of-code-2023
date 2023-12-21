@@ -32,7 +32,7 @@ fn get_lowest1(seeds: Vec<isize>, maps: Vec<MapList>) -> usize {
     let locations = seeds
         .par_iter()
         .map(|seed| {
-            let mut needle = seed.to_owned();
+            let mut needle = *seed;
 
             for map_list in maps.clone() {
                 let matching_map = map_list
@@ -57,7 +57,7 @@ fn get_lowest1(seeds: Vec<isize>, maps: Vec<MapList>) -> usize {
         .collect::<Vec<_>>();
     let lowest = locations.iter().min().expect("should have a minimum");
 
-    lowest.to_owned()
+    *lowest
 }
 
 const CHUNK_SIZE: isize = 1_000;
@@ -71,7 +71,7 @@ fn get_lowest2(seeds: MapList, maps: Vec<MapList>) -> usize {
         let matches = chunk
             .par_iter()
             .map(|start| {
-                let mut needle = start.to_owned();
+                let mut needle = *start;
 
                 for map_list in maps.clone() {
                     let matching_map = map_list
@@ -96,7 +96,7 @@ fn get_lowest2(seeds: MapList, maps: Vec<MapList>) -> usize {
                     .into_iter()
                     .any(|seed| needle >= seed.a && needle < seed.a + seed.len)
                 {
-                    Some(start.to_owned() as usize)
+                    Some(*start as usize)
                 } else {
                     None
                 }

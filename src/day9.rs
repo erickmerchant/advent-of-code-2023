@@ -34,7 +34,7 @@ pub fn part1(input: Vec<String>) -> usize {
             for r in results {
                 let last = r.last().expect("should have a last result");
 
-                result += last.to_owned();
+                result += *last;
             }
 
             result

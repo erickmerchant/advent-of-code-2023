@@ -19,7 +19,7 @@ pub fn part2(_input: Vec<String>) -> usize {
 }
 
 fn hash(acc: u128, curr: &u128) -> u128 {
-    let mut res = acc + curr.to_owned();
+    let mut res = acc + *curr;
 
     res *= 17;
 
