@@ -1,14 +1,14 @@
 use rayon::prelude::*;
 
 pub fn part1(input: Vec<String>) -> usize {
-    get_result(input, 0)
+    get_result(input, 0) as usize
 }
 
 pub fn part2(input: Vec<String>) -> usize {
-    get_result(input, 1)
+    get_result(input, 1) as usize
 }
 
-fn get_result(input: Vec<String>, target: usize) -> usize {
+fn get_result(input: Vec<String>, target: u32) -> u32 {
     let input = input.join("\n");
     let input = input.split("\n\n").collect::<Vec<_>>();
 
@@ -36,15 +36,15 @@ fn get_result(input: Vec<String>, target: usize) -> usize {
             }
 
             'o: for i in 0..rows.len() - 1 {
-                let diff: usize = rows[i] ^ rows[i + 1];
-                let diff = diff.count_ones() as usize;
+                let diff = rows[i] ^ rows[i + 1];
+                let diff = (diff as u32).count_ones();
 
                 if diff == 0 || diff == target {
                     let mut current = 0;
 
                     for (a, b) in (0..=i).rev().zip(i + 1..) {
                         if let (Some(a), Some(b)) = (rows.get(a), rows.get(b)) {
-                            let diff = (a ^ b as &usize).count_ones() as usize;
+                            let diff = ((a ^ b) as u32).count_ones();
 
                             current += diff;
                         }
@@ -54,20 +54,20 @@ fn get_result(input: Vec<String>, target: usize) -> usize {
                         continue 'o;
                     }
 
-                    return (i + 1) * 100;
+                    return ((i + 1) * 100) as u32;
                 }
             }
 
             'o: for i in 0..columns.len() - 1 {
-                let diff: usize = columns[i] ^ columns[i + 1];
-                let diff = diff.count_ones() as usize;
+                let diff = columns[i] ^ columns[i + 1];
+                let diff = (diff as u32).count_ones();
 
                 if diff == 0 || diff == target {
                     let mut current = 0;
 
                     for (a, b) in (0..=i).rev().zip(i + 1..) {
                         if let (Some(a), Some(b)) = (columns.get(a), columns.get(b)) {
-                            let diff = (a ^ b as &usize).count_ones() as usize;
+                            let diff = ((a ^ b) as u32).count_ones();
 
                             current += diff;
                         }
@@ -77,11 +77,11 @@ fn get_result(input: Vec<String>, target: usize) -> usize {
                         continue 'o;
                     }
 
-                    return i + 1;
+                    return (i + 1) as u32;
                 }
             }
 
-            0
+            0_u32
         })
         .sum()
 }
