@@ -5,6 +5,7 @@ pub mod day12;
 pub mod day13;
 pub mod day14;
 pub mod day15;
+pub mod day16;
 pub mod day2;
 pub mod day3;
 pub mod day4;
@@ -63,6 +64,8 @@ fn main() {
         (14, 2) => day14::part2(input),
         (15, 1) => day15::part1(input),
         (15, 2) => day15::part2(input),
+        (16, 1) => day16::part1(input),
+        (16, 2) => day16::part2(input),
         _ => panic!("Incomplete day or part"),
     };
 
