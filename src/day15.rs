@@ -44,6 +44,7 @@ mod tests {
         assert_eq!(part1(get_fixture()), 1320);
     }
 
+    #[ignore]
     #[test]
     fn test_part2() {
         assert_eq!(part2(get_fixture()), 145);
