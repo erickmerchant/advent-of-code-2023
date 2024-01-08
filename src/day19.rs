@@ -118,27 +118,95 @@ pub fn part2(input: Vec<String>) -> usize {
     }
 
     let result = accepted_list
-        .par_iter()
-        .map(|(_key, _index)| {
-            // let mut range_map = RangeMap::new();
-            // let mut current_key = key.as_str();
+        .iter()
+        .map(|(key, index)| {
+            let mut range_map = RangeMap::new();
 
-            // loop {
-            //     let workflow = workflows
-            //         .get(key)
-            //         .expect("should be a valid workflow")
-            //         .clone();
+            range_map.insert(Attribute::ExtremelyCool, Range { min: 1, max: 4000 });
+            range_map.insert(Attribute::Musical, Range { min: 1, max: 4000 });
+            range_map.insert(Attribute::Aerodynamic, Range { min: 1, max: 4000 });
+            range_map.insert(Attribute::Shiny, Range { min: 1, max: 4000 });
 
-            //     for i in 0..index.to_owned() {
-            //         let rule = workflow.rules[i].clone();
-            //     }
+            let mut current_key = key.as_str();
+            let mut current_index = *index;
+            let mut visited = HashSet::new();
 
-            //     if workflow.key == "in" {
-            //         break;
-            //     }
-            // }
+            visited.insert(current_key);
 
-            0
+            loop {
+                let workflow = workflows
+                    .get(current_key)
+                    .expect("should be a valid workflow");
+
+                if let Rule::Normal(attribute, operator, value, _) =
+                    workflow.rules[current_index].clone()
+                {
+                    let range = range_map.get_mut(&attribute).expect("should have entry");
+
+                    match operator {
+                        Operator::GreaterThan => {
+                            if value + 1 > range.min {
+                                range.min = value + 1
+                            }
+                        }
+                        Operator::LessThan => {
+                            if value - 1 < range.max {
+                                range.max = value - 1
+                            }
+                        }
+                    }
+                };
+
+                for i in (0..current_index.to_owned()).rev() {
+                    let rule = workflow.rules[i].clone();
+
+                    if let Rule::Normal(attribute, operator, value, _) = rule {
+                        let range = range_map.get_mut(&attribute).expect("should have entry");
+
+                        match operator {
+                            Operator::GreaterThan => {
+                                if value < range.max {
+                                    range.max = value
+                                }
+                            }
+                            Operator::LessThan => {
+                                if value > range.min {
+                                    range.min = value
+                                }
+                            }
+                        }
+                    };
+                }
+
+                if workflow.key == "in" {
+                    break;
+                }
+
+                let next = destination_map
+                    .get(workflow.key.as_str())
+                    .expect("should have a valid next");
+
+                current_key = next.0.as_str();
+                current_index = next.1;
+
+                if visited.contains(&current_key) {
+                    break;
+                }
+
+                visited.insert(current_key);
+            }
+
+            let mut result = 1;
+
+            for range in range_map.values() {
+                if range.max < range.min {
+                    result *= 0;
+                } else {
+                    result *= range.max - range.min + 1;
+                }
+            }
+
+            result
         })
         .sum::<u128>();
 
