@@ -38,27 +38,28 @@ pub fn part1(input: Vec<String>) -> usize {
                     .expect("should be a valid workflow");
                 let last_rule = &workflow.rules.last().expect("should have a final rule");
 
-                let mut next_key = match last_rule {
-                    Rule::Default(key) => key.as_str(),
-                    _ => panic!("should be a default rule"),
+                let mut next_key = if last_rule.condition.is_none() {
+                    last_rule.destination.as_str()
+                } else {
+                    panic!("should be a default rule")
                 };
 
                 for rule in &workflow.rules {
-                    match rule {
-                        Rule::Default(_) => continue,
-                        Rule::Normal(attribute, operator, target_value, destination) => {
-                            let value = item
-                                .attributes
-                                .get(attribute)
-                                .expect("should have attribute");
-
-                            let matching = match operator {
-                                Operator::LessThan => value < target_value,
-                                Operator::GreaterThan => value > target_value,
-                            };
+                    match rule.condition.clone() {
+                        None => continue,
+                        Some(Condition::GreaterThan(attribute, value)) => {
+                            let matching = item.get(attribute.to_owned()) > value;
 
                             if matching {
-                                next_key = destination.as_str();
+                                next_key = rule.destination.as_str();
+                                break;
+                            }
+                        }
+                        Some(Condition::LessThan(attribute, value)) => {
+                            let matching = item.get(attribute.to_owned()) < value;
+
+                            if matching {
+                                next_key = rule.destination.as_str();
                                 break;
                             }
                         }
@@ -74,7 +75,7 @@ pub fn part1(input: Vec<String>) -> usize {
                 }
 
                 if next_key == "A" {
-                    return item.attributes.values().sum::<u128>();
+                    return item.sum();
                 }
 
                 visited.insert(next_key);
@@ -101,11 +102,8 @@ pub fn part2(input: Vec<String>) -> usize {
 
         let workflow = Workflow::parse(line);
 
-        for (i, rule) in workflow.rules.iter().enumerate() {
-            let desitination = match rule {
-                Rule::Default(destination) => destination,
-                Rule::Normal(_, _, _, destination) => destination,
-            };
+        for (i, rule) in (0..).zip(workflow.clone().rules) {
+            let desitination = rule.destination;
 
             if desitination == "A" {
                 accepted_list.push((workflow.key.clone(), i));
@@ -118,15 +116,9 @@ pub fn part2(input: Vec<String>) -> usize {
     }
 
     let result = accepted_list
-        .iter()
+        .par_iter()
         .map(|(key, index)| {
-            let mut range_map = RangeMap::new();
-
-            range_map.insert(Attribute::ExtremelyCool, Range { min: 1, max: 4000 });
-            range_map.insert(Attribute::Musical, Range { min: 1, max: 4000 });
-            range_map.insert(Attribute::Aerodynamic, Range { min: 1, max: 4000 });
-            range_map.insert(Attribute::Shiny, Range { min: 1, max: 4000 });
-
+            let mut range_map = RangeMap::default();
             let mut current_key = key.as_str();
             let mut current_index = *index;
             let mut visited = HashSet::new();
@@ -138,44 +130,28 @@ pub fn part2(input: Vec<String>) -> usize {
                     .get(current_key)
                     .expect("should be a valid workflow");
 
-                if let Rule::Normal(attribute, operator, value, _) =
-                    workflow.rules[current_index].clone()
-                {
-                    let range = range_map.get_mut(&attribute).expect("should have entry");
-
-                    match operator {
-                        Operator::GreaterThan => {
-                            if value + 1 > range.min {
-                                range.min = value + 1
-                            }
-                        }
-                        Operator::LessThan => {
-                            if value - 1 < range.max {
-                                range.max = value - 1
-                            }
-                        }
+                match workflow.rules[current_index].condition.clone() {
+                    Some(Condition::GreaterThan(attribute, value)) => {
+                        range_map.set_greater_than(&attribute, value + 1);
                     }
-                };
+                    Some(Condition::LessThan(attribute, value)) => {
+                        range_map.set_less_than(&attribute, value - 1);
+                    }
+                    _ => (),
+                }
 
                 for i in (0..current_index.to_owned()).rev() {
                     let rule = workflow.rules[i].clone();
 
-                    if let Rule::Normal(attribute, operator, value, _) = rule {
-                        let range = range_map.get_mut(&attribute).expect("should have entry");
-
-                        match operator {
-                            Operator::GreaterThan => {
-                                if value < range.max {
-                                    range.max = value
-                                }
-                            }
-                            Operator::LessThan => {
-                                if value > range.min {
-                                    range.min = value
-                                }
-                            }
+                    match rule.condition {
+                        Some(Condition::GreaterThan(attribute, value)) => {
+                            range_map.set_less_than(&attribute, value);
                         }
-                    };
+                        Some(Condition::LessThan(attribute, value)) => {
+                            range_map.set_greater_than(&attribute, value);
+                        }
+                        _ => (),
+                    }
                 }
 
                 if workflow.key == "in" {
@@ -196,17 +172,7 @@ pub fn part2(input: Vec<String>) -> usize {
                 visited.insert(current_key);
             }
 
-            let mut result = 1;
-
-            for range in range_map.values() {
-                if range.max < range.min {
-                    result *= 0;
-                } else {
-                    result *= range.max - range.min + 1;
-                }
-            }
-
-            result
+            range_map.sum()
         })
         .sum::<u128>();
 
@@ -216,8 +182,6 @@ pub fn part2(input: Vec<String>) -> usize {
 type WorkflowMap = HashMap<Key, Workflow>;
 
 type Key = String;
-
-type RangeMap = HashMap<Attribute, Range>;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 struct Workflow {
@@ -240,7 +204,10 @@ impl Workflow {
             .map(Rule::parse_normal)
             .collect::<Vec<Rule>>();
 
-        rules.push(Rule::Default(captures["default_destination"].to_string()));
+        rules.push(Rule {
+            condition: None,
+            destination: captures["default_destination"].to_string(),
+        });
 
         Self {
             key: captures["key"].to_string(),
@@ -250,9 +217,15 @@ impl Workflow {
 }
 
 #[derive(PartialEq, Eq, Debug, Clone)]
-enum Rule {
-    Normal(Attribute, Operator, u128, Key),
-    Default(Key),
+enum Condition {
+    LessThan(Attribute, u128),
+    GreaterThan(Attribute, u128),
+}
+
+#[derive(PartialEq, Eq, Debug, Clone)]
+struct Rule {
+    condition: Option<Condition>,
+    destination: Key,
 }
 
 impl Rule {
@@ -268,17 +241,19 @@ impl Rule {
             .captures(line)
             .expect("should be able to capture");
         let attribute = Attribute::parse(captures["attribute"].to_string());
-        let operator = Operator::parse(captures["operator"].to_string());
+        let operator = captures["operator"].to_string();
         let value = captures["value"]
             .parse::<u128>()
             .expect("should be a valid number");
 
-        Self::Normal(
-            attribute,
-            operator,
-            value,
-            captures["destination"].to_string(),
-        )
+        Self {
+            destination: captures["destination"].to_string(),
+            condition: match operator.as_str() {
+                ">" => Some(Condition::GreaterThan(attribute, value)),
+                "<" => Some(Condition::LessThan(attribute, value)),
+                _ => panic!("should be a valid operator"),
+            },
+        }
     }
 }
 
@@ -302,49 +277,112 @@ impl Attribute {
     }
 }
 
-#[derive(PartialEq, Eq, Debug, Clone)]
-enum Operator {
-    LessThan,
-    GreaterThan,
-}
-
-impl Operator {
-    fn parse(letter: String) -> Self {
-        match letter.as_str() {
-            "<" => Self::LessThan,
-            ">" => Self::GreaterThan,
-            _ => panic!("should be a valid operator"),
-        }
-    }
-}
-
-#[derive(Debug)]
+#[derive(Debug, Default)]
 struct Item {
-    attributes: HashMap<Attribute, u128>,
-}
-
-#[derive(Debug)]
-struct Range {
-    min: u128,
-    max: u128,
+    x: u128,
+    m: u128,
+    a: u128,
+    s: u128,
 }
 
 impl Item {
+    fn get(&self, attribute: Attribute) -> u128 {
+        match attribute {
+            Attribute::ExtremelyCool => self.x,
+            Attribute::Musical => self.m,
+            Attribute::Aerodynamic => self.a,
+            Attribute::Shiny => self.s,
+        }
+    }
+
+    fn set(&mut self, attribute: Attribute, value: u128) {
+        match attribute {
+            Attribute::ExtremelyCool => self.x = value,
+            Attribute::Musical => self.m = value,
+            Attribute::Aerodynamic => self.a = value,
+            Attribute::Shiny => self.s = value,
+        }
+    }
+
+    fn sum(&self) -> u128 {
+        self.x + self.m + self.a + self.s
+    }
+
     fn parse(line: &str) -> Self {
         static ATTRIBUTE_REGEX: Lazy<Regex> = Lazy::new(|| {
             Regex::new(r"(?P<attribute>[xmas])=(?P<value>\d+)").expect("should be a valid regex")
         });
 
-        let mut attributes = HashMap::new();
+        let mut item = Self::default();
 
         for (_, [attribute, value]) in ATTRIBUTE_REGEX.captures_iter(line).map(|c| c.extract()) {
             let attribute = Attribute::parse(attribute.to_string());
             let value = value.parse::<u128>().expect("should be a valid number");
 
-            attributes.insert(attribute, value);
+            item.set(attribute, value);
         }
 
-        Self { attributes }
+        item
+    }
+}
+
+#[derive(Debug)]
+struct RangeMap {
+    x: (u128, u128),
+    m: (u128, u128),
+    a: (u128, u128),
+    s: (u128, u128),
+}
+
+impl Default for RangeMap {
+    fn default() -> Self {
+        Self {
+            x: (1, 4000),
+            m: (1, 4000),
+            a: (1, 4000),
+            s: (1, 4000),
+        }
+    }
+}
+
+impl RangeMap {
+    fn get_mut(&mut self, attribute: &Attribute) -> &mut (u128, u128) {
+        match attribute {
+            Attribute::ExtremelyCool => &mut self.x,
+            Attribute::Musical => &mut self.m,
+            Attribute::Aerodynamic => &mut self.a,
+            Attribute::Shiny => &mut self.s,
+        }
+    }
+
+    fn set_greater_than(&mut self, attribute: &Attribute, value: u128) {
+        let range = self.get_mut(attribute);
+
+        if value > range.0 {
+            range.0 = value
+        }
+    }
+
+    fn set_less_than(&mut self, attribute: &Attribute, value: u128) {
+        let range = self.get_mut(attribute);
+
+        if value < range.1 {
+            range.1 = value
+        }
+    }
+
+    fn sum(&self) -> u128 {
+        let mut result = 1;
+
+        for range in [self.x, self.m, self.a, self.s] {
+            if range.1 < range.0 {
+                result *= 0;
+            } else {
+                result *= range.1 - range.0 + 1;
+            }
+        }
+
+        result
     }
 }
 
