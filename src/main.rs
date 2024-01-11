@@ -18,6 +18,7 @@ pub mod day17;
 pub mod day18;
 pub mod day19;
 pub mod day20;
+pub mod day21;
 
 use clap::Parser;
 use core::panic;
@@ -78,6 +79,8 @@ fn main() {
         (19, 2) => day19::part2(input),
         (20, 1) => day20::part1(input),
         (20, 2) => day20::part2(input),
+        (21, 1) => day21::part1(input),
+        (21, 2) => day21::part2(input),
         _ => panic!("Incomplete day or part"),
     };
 

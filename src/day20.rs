@@ -249,10 +249,10 @@ mod tests {
 
     fn get_fixture() -> Vec<String> {
         r"broadcaster -> a, b, c
-        %a -> b
-        %b -> c
-        %c -> inv
-        &inv -> a"
+          %a -> b
+          %b -> c
+          %c -> inv
+          &inv -> a"
             .split('\n')
             .map(|s| s.trim().to_string())
             .collect()
