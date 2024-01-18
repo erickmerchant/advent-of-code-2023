@@ -6,7 +6,6 @@ pub fn part1(input: Vec<String>) -> usize {
         .split(',')
         .map(|s| s.chars().collect::<Vec<_>>())
         .collect::<Vec<_>>();
-
     let result = values
         .par_iter()
         .map(|v| v.iter().fold(0_u128, hash))
@@ -67,7 +66,6 @@ pub fn part2(input: Vec<String>) -> usize {
             operation
         })
         .collect::<Vec<_>>();
-
     let mut boxes = vec![Vec::<Item>::new(); 256];
 
     for operation in operations {

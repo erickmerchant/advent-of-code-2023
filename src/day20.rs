@@ -97,7 +97,6 @@ fn parse_modules(input: Vec<String>) -> HashMap<String, Box<dyn Module>> {
         let captures = MODULE_REGEX
             .captures(line.as_str())
             .expect("should be able to capture");
-
         let destinations = captures["destinations"]
             .split(", ")
             .map(|s| s.to_string())
@@ -138,7 +137,6 @@ fn parse_modules(input: Vec<String>) -> HashMap<String, Box<dyn Module>> {
 
 pub fn part1(input: Vec<String>) -> usize {
     let mut modules = parse_modules(input);
-
     let mut highs = 0;
     let mut lows = 0;
 
@@ -186,7 +184,6 @@ pub fn part1(input: Vec<String>) -> usize {
 
 pub fn part2(input: Vec<String>) -> usize {
     let mut modules = parse_modules(input);
-
     let mut results = HashMap::new();
 
     'o: for i in 1.. {

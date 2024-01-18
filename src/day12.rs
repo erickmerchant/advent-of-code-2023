@@ -43,7 +43,6 @@ fn get_total(input: Vec<String>, fold: u128) -> u128 {
                 length,
                 cache: HashMap::new(),
             };
-
             let total =
                 combinations.calculate(0, 0, &blocks, blocks.iter().sum(), blocks.len() as u128);
 

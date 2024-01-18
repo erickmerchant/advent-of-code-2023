@@ -25,7 +25,6 @@ pub fn part1(input: Vec<String>) -> usize {
 
 pub fn part2(input: Vec<String>) -> usize {
     let mut starts = MoveList::new();
-
     let grid = Grid {
         cells: input
             .iter()

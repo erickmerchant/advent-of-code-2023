@@ -61,7 +61,6 @@ pub fn part1(input: Vec<String>) -> usize {
 
             sum => sum,
         };
-
         let cards = cards
             .into_iter()
             .collect_tuple::<(char, char, char, char, char)>()

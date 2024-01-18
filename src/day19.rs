@@ -37,7 +37,6 @@ pub fn part1(input: Vec<String>) -> usize {
                     .get(current_key)
                     .expect("should be a valid workflow");
                 let last_rule = &workflow.rules.last().expect("should have a final rule");
-
                 let mut next_key = if last_rule.condition.is_none() {
                     last_rule.destination.as_str()
                 } else {

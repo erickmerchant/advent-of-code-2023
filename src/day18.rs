@@ -27,11 +27,9 @@ pub fn part1(input: Vec<String>) -> usize {
         let captures = DIG_REGEX
             .captures(line.as_str())
             .expect("should be able to capture");
-
         let length = &captures["length"]
             .parse::<isize>()
             .expect("should be a valid number");
-
         let direction = &captures["direction"]
             .chars()
             .next()
@@ -58,15 +56,12 @@ pub fn part2(input: Vec<String>) -> usize {
         let captures = DIG_REGEX
             .captures(line.as_str())
             .expect("should be able to capture");
-
         let length =
             isize::from_str_radix(&captures["length"], 16).expect("should be a valid number");
-
         let direction = &captures["direction"]
             .chars()
             .next()
             .expect("should be a valid char");
-
         let direction = match direction {
             '0' => 'R',
             '1' => 'D',
