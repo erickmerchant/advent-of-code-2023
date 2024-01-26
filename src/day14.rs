@@ -65,15 +65,10 @@ impl Tilter {
                 }
             }
 
-            // println!("{}\n\n", self.state.join("\n"));
             self.tilt_north();
-            // println!("{}\n\n", self.state.join("\n"));
             self.tilt_west();
-            // println!("{}\n\n", self.state.join("\n"));
             self.tilt_south();
-            // println!("{}\n\n", self.state.join("\n"));
             self.tilt_east();
-            // println!("{}\n\n", self.state.join("\n"));
 
             count += 1;
         }
