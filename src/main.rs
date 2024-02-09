@@ -37,7 +37,7 @@ fn main() {
     let args = Args::parse();
     let stdin = io::stdin();
     let handle = stdin.lock();
-    let input = handle.lines().flatten().collect();
+    let input = handle.lines().map_while(Result::ok).collect();
     let output = match (args.day, args.part) {
         (1, 1) => day01::part1(input),
         (1, 2) => day01::part2(input),
