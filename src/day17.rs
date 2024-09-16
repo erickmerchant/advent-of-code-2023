@@ -136,9 +136,9 @@ pub fn dijkstra(input: Vec<String>, min: usize, max: usize) -> usize {
                 let mut new_distances = HashMap::<Key, usize>::new();
 
                 for (i, edge) in edges.iter().enumerate() {
-                    tentative_distance += nodes[&edge].weight;
+                    tentative_distance += nodes[edge].weight;
 
-                    if i + 1 >= limits.min && tentative_distance < distances[&edge] {
+                    if i + 1 >= limits.min && tentative_distance < distances[edge] {
                         new_distances.insert(*edge, tentative_distance);
                     }
                 }
