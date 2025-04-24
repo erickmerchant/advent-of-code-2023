@@ -38,11 +38,7 @@ fn get_total(input: Vec<String>, rate: usize) -> usize {
 
             if cell == '#' {
                 for galaxy in galaxies.clone() {
-                    let mut sub_total = if galaxy.col > col {
-                        galaxy.col - col
-                    } else {
-                        col - galaxy.col
-                    };
+                    let mut sub_total = galaxy.col.abs_diff(col);
 
                     sub_total += row - galaxy.row;
 
